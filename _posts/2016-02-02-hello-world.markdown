@@ -1,0 +1,21 @@
+---
+layout: post
+title:  "Hello World!"
+date:   2016-02-02 11:14:22 +0200
+categories: jekyll update
+---
+Hello World!
+
+{% highlight ruby %}
+def say_hello
+  puts "Hello from the other side ..."
+end
+say_hello('Tom')
+#=> prints 'Hello from the other side ...' to STDOUT.
+{% endhighlight %}
+
+Check out the [Jekyll docs][jekyll-docs] for more info on how to get the most out of Jekyll. File all bugs/feature requests at [Jekyll’s GitHub repo][jekyll-gh]. If you have questions, you can ask them on [Jekyll Talk][jekyll-talk].
+
+[jekyll-docs]: http://jekyllrb.com/docs/home
+[jekyll-gh]:   https://github.com/jekyll/jekyll
+[jekyll-talk]: https://talk.jekyllrb.com/
