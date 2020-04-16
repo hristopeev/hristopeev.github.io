@@ -1,23 +1,87 @@
----
-layout: default
----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
 
-<div class="home">
-
-  <h1 class="page-heading">Posts</h1>
-
-  <ul class="post-list">
-    {% for post in site.posts %}
-      <li>
-        <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
-
-        <h2>
-          <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-        </h2>
-      </li>
-    {% endfor %}
-  </ul>
-
-  <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p>
-
+<div class="container ma">
+  <h2>C-Test Генератор</h2>
+  <form name='form' id='form'>
+    <!-- <div class="form-group">
+      <label for="email">Email:</label>
+      <input type="email" class="form-control" id="email" placeholder="Enter email" name="email">
+    </div>
+    <div class="form-group">
+      <label for="pwd">Password:</label>
+      <input type="password" class="form-control" id="pwd" placeholder="Enter password" name="pwd">
+    </div> -->
+    <div class="form-group">
+      <label for="text">Текст:</label>
+      <!-- <input type="textarea" class="form-control" id="text" placeholder="Enter text here" name="text"> -->
+      <textarea class="form-control" id="text" placeholder="Enter text here" name="text" rows='10'></textarea>
+    </div>
+    <!-- <div class="checkbox">
+      <label><input type="checkbox" name="remember"> Remember me</label>
+    </div> -->
+    <button type="submit" class="btn btn-default">Генерирай</button>
+  </form>
 </div>
+
+<br/>
+<br/>
+
+<div class="container">
+  <p id="exam"></p>
+  <br>
+  <br>
+  <p id="answers"></p>
+</div>
+
+<script type="text/javascript">
+  $('#form').submit(function(e) {
+    e.preventDefault();
+    var text = $('#text').val();
+    var step = 2;
+    var minWordLength = 3;
+
+    var splitedText = text.split(" ");
+    var answers = [];
+
+    var counter = 1;
+    for(var i = 0; i < splitedText.length; i++) {
+      var wordLength = splitedText[i].length;
+
+      if(i % step != 0 && wordLength > minWordLength) {
+        var word = splitedText[i];
+        var removeCharsCount = wordLength / 2;
+
+        for(var j = 0; j < removeCharsCount; j++) {
+          splitedText[i] = splitedText[i].slice(0, -1);
+        }
+
+        for(var j = 0; j < removeCharsCount; j++) {
+          splitedText[i] += "_";
+        }
+
+        splitedText[i] += `(${counter})`
+
+        answers.push(`<strong>${word}(${counter})</strong>`);
+
+        counter++;
+      } else {
+        answers.push(splitedText[i])
+      }
+    }
+
+    $("#exam").text(splitedText.join(" "));
+    $("#answers").html(answers.join(" "));
+  });
+</script>
+</body>
+</html>
