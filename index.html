@@ -1,34 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Bootstrap Example</title>
+  <title>C-Test Генератор</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+  <style>
+    #answers-sheet {
+      columns: 2;
+      -webkit-columns: 2;
+      -moz-columns: 2;
+    }
+
+    @media print {
+      .hide-for-print {
+        display: none;
+      }
+
+      #exam {
+        page-break-after: always;
+      }
+
+      hr {
+        display: none;
+      }
+    }
+
+  </style>
 </head>
 <body>
 
-<div class="container ma">
+<div class="container ma hide-for-print">
   <h2>C-Test Генератор</h2>
   <form name='form' id='form'>
-    <!-- <div class="form-group">
-      <label for="email">Email:</label>
-      <input type="email" class="form-control" id="email" placeholder="Enter email" name="email">
+   <div class="form-group">
+      <label for="frequency">Честота</label>
+      <select class="form-control" id="frequency" placeholder="Честота" name="frequency">
+        <option value='2'>всяка втора дума</option>
+        <option value='3'>всяка трета дума</option>
+        <option value='4'>всяка четвърта дума</option>
+        <option value='5'>всяка пета дума</option>
+      </select>
     </div>
-    <div class="form-group">
-      <label for="pwd">Password:</label>
-      <input type="password" class="form-control" id="pwd" placeholder="Enter password" name="pwd">
-    </div> -->
     <div class="form-group">
       <label for="text">Текст:</label>
       <!-- <input type="textarea" class="form-control" id="text" placeholder="Enter text here" name="text"> -->
       <textarea class="form-control" id="text" placeholder="Enter text here" name="text" rows='10'></textarea>
     </div>
-    <!-- <div class="checkbox">
-      <label><input type="checkbox" name="remember"> Remember me</label>
-    </div> -->
+    <div class="checkbox">
+      <label><input type="checkbox" id="add_numbers" name="add_numbers" checked>Включи номерация</label>
+    </div>
+    <div class="checkbox">
+      <label><input type="checkbox" id="show_empty_spaces_count" name="show_empty_spaces_count" checked>Покажи броя липсващи букви</label>
+    </div>
     <button type="submit" class="btn btn-default">Генерирай</button>
   </form>
 </div>
@@ -38,50 +65,146 @@
 
 <div class="container">
   <p id="exam"></p>
-  <br>
-  <br>
-  <p id="answers"></p>
+  <hr>
+  <p id="answers-text"></p>
+  <hr>
+  <ol id="answers-sheet"></ol>
 </div>
 
 <script type="text/javascript">
+  var PUNCTUATION = "" +
+                    "’'\"" +     // apostrophe
+                    "()[]{}<>" + // brackets
+                    ":" +        // colon
+                    "," +        // comma
+                    "‒–—―" +     // dashes
+                    "…" +        // ellipsis
+                    "!" +        // exclamation mark
+                    "." +        // full stop/period
+                    "«»" +       // guillemets
+                    "-‐" +       // hyphen
+                    "?" +        // question mark
+                    "‘’“”" +     // quotation marks
+                    ";" +        // semicolon
+                    "/" +        // slash/stroke
+                    "⁄" +        // solidus
+                    "␠" +        // space?
+                    "·" +        // interpunct
+                    "&" +        // ampersand
+                    "@" +        // at sign
+                    "*" +        // asterisk
+                    "\\" +       // backslash
+                    "•" +        // bullet
+                    "^" +        // caret
+                    "¤¢$€£¥₩₪" + // currency
+                    "†‡" +       // dagger
+                    "°" +        // degree
+                    "¡" +        // inverted exclamation point
+                    "¿" +        // inverted question mark
+                    "¬" +        // negation
+                    "#" +        // number sign (hashtag)
+                    "№" +        // numero sign ()
+                    "%‰‱" +      // percent and related signs
+                    "¶" +        // pilcrow
+                    "′" +        // prime
+                    "§" +        // section sign
+                    "~" +        // tilde/swung dash
+                    "¨" +        // umlaut/diaeresis
+                    "_" +        // underscore/understrike
+                    "|¦" +       // vertical/pipe/broken bar
+                    "⁂" +        // asterism
+                    "☞" +        // index/fist
+                    "∴" +        // therefore sign
+                    "‽" +        // interrobang
+                    "※";         // reference mark
+
+
   $('#form').submit(function(e) {
     e.preventDefault();
+    var text = "";
     var text = $('#text').val();
-    var step = 2;
-    var minWordLength = 3;
+    var step = $('#frequency').val();
+    var add_numbers = $("#add_numbers").is(":checked");
+    var show_empty_spaces_count = $("#show_empty_spaces_count").is(":checked");
 
-    var splitedText = text.split(" ");
-    var answers = [];
+    var minWordLength = 4;
+
+    text = prepareText(text);
+
+    var quiz = text.trim().split(" ");
+    var answers = text.trim().split(" ");
+    var answersSheet = [];
+    var wordIndexes = findWordsIndexes(quiz, minWordLength);
+
 
     var counter = 1;
-    for(var i = 0; i < splitedText.length; i++) {
-      var wordLength = splitedText[i].length;
 
-      if(i % step != 0 && wordLength > minWordLength) {
-        var word = splitedText[i];
-        var removeCharsCount = wordLength / 2;
+    $.each(wordIndexes, function(idx, wordIndex) {
+      if(idx % step == 0) {
+        var word = quiz[wordIndex];
+        var removeCharsCount = word.length / 2;
 
         for(var j = 0; j < removeCharsCount; j++) {
-          splitedText[i] = splitedText[i].slice(0, -1);
+          quiz[wordIndex] = quiz[wordIndex].slice(0, -1);
         }
 
         for(var j = 0; j < removeCharsCount; j++) {
-          splitedText[i] += "_";
+          if(show_empty_spaces_count) {
+            quiz[wordIndex] += " _"
+          } else {
+            quiz[wordIndex] += "_"
+          }
         }
 
-        splitedText[i] += `(${counter})`
+        if(add_numbers) {
+          quiz[wordIndex] += `(${counter})`
+          answers[wordIndex] = `<strong>${word}(${counter})</strong>`;
+        } else {
+          answers[wordIndex] = `<strong>${word}</strong>`;
+        }
 
-        answers.push(`<strong>${word}(${counter})</strong>`);
+        answersSheet.push(word);
 
         counter++;
-      } else {
-        answers.push(splitedText[i])
+      }
+    });
+
+    $("#exam").text(quiz.join(" "));
+    $("#answers-text").html(answers.join(" "));
+
+    $("#answers-sheet").html(null);
+    $.each(answersSheet, function(answerIndex, answerValue) {
+      var li = $('<li/>').text(answerValue).appendTo($("#answers-sheet"));
+    });
+  });
+
+  function prepareText(text) {
+    var result = text.trim();
+    $.each(PUNCTUATION.split(''), function(idx, mark) {
+      var re = new RegExp(escapeRegExp(mark), 'g');
+      result = result.replace(re, ' ' + mark + ' ');
+    });
+
+    return result;
+  }
+
+  function escapeRegExp(string) {
+    return string.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  }
+
+  function findWordsIndexes(sentenceArray, minWordLength) {
+    var indexes = [];
+    for(var i = 0; i < sentenceArray.length; i++) {
+      var word = sentenceArray[i];
+
+      if(sentenceArray[i].length >= minWordLength) {
+        indexes.push(i);
       }
     }
 
-    $("#exam").text(splitedText.join(" "));
-    $("#answers").html(answers.join(" "));
-  });
+    return indexes;
+  }
+
 </script>
 </body>
 </html>
