@@ -127,7 +127,7 @@
     var add_numbers = $("#add_numbers").is(":checked");
     var show_empty_spaces_count = $("#show_empty_spaces_count").is(":checked");
 
-    var minWordLength = 4;
+    var minWordLength = 2;
 
     text = prepareText(text);
 
@@ -140,37 +140,39 @@
     var counter = 1;
 
     $.each(wordIndexes, function(idx, wordIndex) {
-      if(idx % step == 0) {
-        var word = quiz[wordIndex];
-        var removeCharsCount = word.length / 2;
+      if (idx >= 2) {
+        if(idx % step == 0) {
+          var word = quiz[wordIndex];
+          var removeCharsCount = word.length / 2;
 
-        for(var j = 0; j < removeCharsCount; j++) {
-          quiz[wordIndex] = quiz[wordIndex].slice(0, -1);
-        }
-
-        for(var j = 0; j < removeCharsCount; j++) {
-          if(show_empty_spaces_count) {
-            quiz[wordIndex] += " _"
-          } else {
-            quiz[wordIndex] += "_"
+          for(var j = 0; j < removeCharsCount; j++) {
+            quiz[wordIndex] = quiz[wordIndex].slice(0, -1);
           }
+
+          for(var j = 0; j < removeCharsCount; j++) {
+            if(show_empty_spaces_count) {
+              quiz[wordIndex] += " _"
+            } else {
+              quiz[wordIndex] += "_"
+            }
+          }
+
+          if(add_numbers) {
+            quiz[wordIndex] += `(${counter})`
+            answers[wordIndex] = `<strong>${word}(${counter})</strong>`;
+          } else {
+            answers[wordIndex] = `<strong>${word}</strong>`;
+          }
+
+          answersSheet.push(word);
+
+          counter++;
         }
-
-        if(add_numbers) {
-          quiz[wordIndex] += `(${counter})`
-          answers[wordIndex] = `<strong>${word}(${counter})</strong>`;
-        } else {
-          answers[wordIndex] = `<strong>${word}</strong>`;
-        }
-
-        answersSheet.push(word);
-
-        counter++;
       }
     });
 
-    $("#exam").text(quiz.join(" "));
-    $("#answers-text").html(answers.join(" "));
+    $("#exam").text(cleanWhiteSpaces(quiz.join(" ")));
+    $("#answers-text").html(cleanWhiteSpaces(answers.join(" ")));
 
     $("#answers-sheet").html(null);
     $.each(answersSheet, function(answerIndex, answerValue) {
@@ -188,8 +190,13 @@
     return result;
   }
 
-  function escapeRegExp(string) {
-    return string.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  function escapeRegExp(text) {
+    return text.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  }
+
+  function cleanWhiteSpaces(text) {
+    var regex = /\s+([.,!":?;()])/g;
+    return text.replace(regex, '$1');
   }
 
   function findWordsIndexes(sentenceArray, minWordLength) {
