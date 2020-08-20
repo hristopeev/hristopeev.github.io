@@ -139,37 +139,34 @@
 
     var counter = 1;
 
-    $.each(wordIndexes, function(idx, wordIndex) {
-      if (idx >= 2) {
-        if(idx % step == 0) {
-          var word = quiz[wordIndex];
-          var removeCharsCount = word.length / 2;
+    for(var i = step - 1; i < wordIndexes.length; i += +step) {
+      var wordIndex = wordIndexes[i];
+      var word = quiz[wordIndex];
+      var removeCharsCount = word.length / 2;
 
-          for(var j = 0; j < removeCharsCount; j++) {
-            quiz[wordIndex] = quiz[wordIndex].slice(0, -1);
-          }
+      for(var j = 0; j < removeCharsCount; j++) {
+        quiz[wordIndex] = quiz[wordIndex].slice(0, -1);
+      }
 
-          for(var j = 0; j < removeCharsCount; j++) {
-            if(show_empty_spaces_count) {
-              quiz[wordIndex] += " _"
-            } else {
-              quiz[wordIndex] += "_"
-            }
-          }
-
-          if(add_numbers) {
-            quiz[wordIndex] += `(${counter})`
-            answers[wordIndex] = `<strong>${word}(${counter})</strong>`;
-          } else {
-            answers[wordIndex] = `<strong>${word}</strong>`;
-          }
-
-          answersSheet.push(word);
-
-          counter++;
+      for(var j = 0; j < removeCharsCount; j++) {
+        if(show_empty_spaces_count) {
+          quiz[wordIndex] += " _"
+        } else {
+          quiz[wordIndex] += "_"
         }
       }
-    });
+
+      if(add_numbers) {
+        quiz[wordIndex] += `(${counter})`
+        answers[wordIndex] = `<strong>${word}(${counter})</strong>`;
+      } else {
+        answers[wordIndex] = `<strong>${word}</strong>`;
+      }
+
+      answersSheet.push(word);
+
+      counter++;
+    }
 
     $("#exam").text(cleanWhiteSpaces(quiz.join(" ")));
     $("#answers-text").html(cleanWhiteSpaces(answers.join(" ")));
